@@ -13,7 +13,6 @@ namespace x_kom_simple_API.Controllers
     [Route("[controller]")]
     public class EventsController : ControllerBase
     {
-        private IMongoCollection<Event> _events;
         private IMongoClient client;
 
         public EventsController (IMongoClient client)
@@ -35,8 +34,17 @@ namespace x_kom_simple_API.Controllers
         {
             var database = client.GetDatabase("XKOM");
             var collection = database.GetCollection<Event>("Events");
+            //e.Participants.Add(new Participant());
             collection.InsertOne(e);
 
+        }
+
+        [HttpDelete]
+        public void DeleteEvent(Event e)
+        {
+            var database = client.GetDatabase("XKOM");
+            var collection = database.GetCollection<Event>("Events");
+            collection.DeleteOne(x => e.Name == x.Name);
         }
 
 

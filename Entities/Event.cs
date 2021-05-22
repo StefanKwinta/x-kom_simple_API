@@ -15,9 +15,19 @@ namespace x_kom_simple_API.Entities
         [BsonElement("name")]
         public string Name { get; init; }
 
+  
+        [BsonElement("partcipants")]
+        public List<Participant> Participants
+        {
+            get;
+            set;
+        }
+
         public Event(string Name)
         {
             this.Name = Name;
         }
+
+
     }
 }

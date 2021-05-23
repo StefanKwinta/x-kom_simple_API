@@ -12,7 +12,7 @@ namespace x_kom_simple_API.Controllers
     [Route("[controller]")]
     public class ParticipantController : ControllerBase
     {
-        private IMongoClient client;
+        private readonly IMongoClient client;
 
         public ParticipantController(IMongoClient client)
         {
@@ -22,15 +22,18 @@ namespace x_kom_simple_API.Controllers
         [HttpPut]
         public ActionResult<Event> PostParticipant(UpdateData updateData)
         {
-            if(!isCorrectData(updateData))
+            if(!IsCorrectData(updateData))
             {
                 return StatusCode(403);
             }
-            var database = client.GetDatabase("XKOM");
-            var collection = database.GetCollection<Event>("Events");
-            var ev = collection.Find(x => x.Name == updateData.updateEvent.Name).First();
+
+            var collection = GetEventsCollection("XKOM", "Events");
+
+            //var filter = Builders<Event>.Filter.Eq("id",updateData.EventToUpdate.Id);
+            //Event ev = collection.Find(filter).First();
+            Event ev = collection.Find(x => x.Id == updateData.EventToUpdate.Id).First();
             var updated = ev.Participants;
-            updated.Add(updateData.updateParticipant);
+            updated.Add(updateData.ParticpantToUpdate);
 
             if(updated.Count > 25)
             {
@@ -46,11 +49,17 @@ namespace x_kom_simple_API.Controllers
 
         }
 
-        private bool isCorrectData(UpdateData updateData)
+        private bool IsCorrectData(UpdateData updateData)
         {
    
-            return !(updateData.updateParticipant.Email == null || updateData.updateParticipant.Name == null) 
-                && updateData.updateParticipant.Email.Contains("@");
+            return !(updateData.ParticpantToUpdate.Email == null || updateData.ParticpantToUpdate.Name == null) 
+                && updateData.ParticpantToUpdate.Email.Contains("@");
+        }
+
+        private IMongoCollection<Event> GetEventsCollection(String databaseName, String collectionName)
+        {
+            var database = client.GetDatabase(databaseName);
+            return database.GetCollection<Event>(collectionName); 
         }
     }
 }

@@ -13,7 +13,7 @@ namespace x_kom_simple_API.Controllers
     [Route("[controller]")]
     public class EventsController : ControllerBase
     {
-        private IMongoClient client;
+        private readonly IMongoClient client;
 
         public EventsController (IMongoClient client)
         {
@@ -23,8 +23,7 @@ namespace x_kom_simple_API.Controllers
         [HttpGet]
         public IEnumerable<Event> Get()
         {
-            var database = client.GetDatabase("XKOM");
-            var collection = database.GetCollection<Event>("Events");
+            var collection = getEventsCollection("XKOM", "Events");
             return collection.Find(s => true).ToList();
         }
 
@@ -32,9 +31,7 @@ namespace x_kom_simple_API.Controllers
         [HttpPost]
         public void PostEvent(Event e)
         {
-            var database = client.GetDatabase("XKOM");
-            var collection = database.GetCollection<Event>("Events");
-            //e.Participants.Add(new Participant());
+            var collection = getEventsCollection("XKOM", "Events");
             collection.InsertOne(e);
 
         }
@@ -42,9 +39,14 @@ namespace x_kom_simple_API.Controllers
         [HttpDelete]
         public void DeleteEvent(Event e)
         {
-            var database = client.GetDatabase("XKOM");
-            var collection = database.GetCollection<Event>("Events");
+            var collection = getEventsCollection("XKOM", "Events");
             collection.DeleteOne(x => e.Name == x.Name);
+        }
+
+        private IMongoCollection<Event> getEventsCollection(String databaseName, String collectionName)
+        {
+            var database = client.GetDatabase(databaseName);
+            return database.GetCollection<Event>(collectionName);
         }
 
 

@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using x_kom_simple_API.Entities;
+using x_kom_simple_API.Utilities;
 
 namespace x_kom_simple_API.Controllers
 {
@@ -27,11 +26,19 @@ namespace x_kom_simple_API.Controllers
                 return StatusCode(403);
             }
 
+            Event ev = new Event();
             var collection = GetEventsCollection("XKOM", "Events");
+            var filter = Filters.getEventEaqualsFilter(updateData.EventToUpdate);
 
-            //var filter = Builders<Event>.Filter.Eq("id",updateData.EventToUpdate.Id);
-            //Event ev = collection.Find(filter).First();
-            Event ev = collection.Find(x => x.Id == updateData.EventToUpdate.Id).First();
+            try
+            {
+                ev = collection.Find(filter).First();
+            }
+            catch(System.InvalidOperationException e)
+            {
+                return StatusCode(404);
+            }
+
             var updated = ev.Participants;
             updated.Add(updateData.ParticpantToUpdate);
 
@@ -40,9 +47,7 @@ namespace x_kom_simple_API.Controllers
                 return StatusCode(403);
             }
 
-            var filter = Builders<Event>.Filter.Eq("name", ev.Name);
             var update = Builders<Event>.Update.Set(x => x.Participants, updated);
-
             collection.UpdateOne(filter, update);
 
             return StatusCode(200); 
@@ -61,5 +66,6 @@ namespace x_kom_simple_API.Controllers
             var database = client.GetDatabase(databaseName);
             return database.GetCollection<Event>(collectionName); 
         }
+
     }
 }

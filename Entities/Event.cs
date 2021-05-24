@@ -1,14 +1,14 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using Nest;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace x_kom_simple_API.Entities
 {
     public class Event
     {
+        
         [BsonId]
         public ObjectId Id { get; init; }
 
@@ -27,6 +27,9 @@ namespace x_kom_simple_API.Entities
         [BsonElement("end_time")]
         public DateTime EndTime { get; init; }
 
+        [BsonElement("place")]
+        public GeoLocation Place { get; init; }
+
 
         [BsonElement("partcipants")]
         public List<Participant> Participants
@@ -35,26 +38,35 @@ namespace x_kom_simple_API.Entities
             set;
         }
 
-        public Event(string Name)
+        public Event(ObjectId id, string name, string type, string description, DateTime startTime, DateTime endTime, GeoLocation place, List<Participant> participants)
         {
-            this.Name = Name;
+            Id = id;
+            Name = name;
+            Type = type;
+            Description = description;
+            StartTime = startTime;
+            EndTime = endTime;
+            Place = place;
+            Participants = participants;
+        }
+        public Event()
+        {
         }
 
         public override bool Equals(object obj)
         {
             return obj is Event @event &&
-                   Id.Equals(@event.Id) &&
                    Name == @event.Name &&
                    Type == @event.Type &&
                    Description == @event.Description &&
                    StartTime == @event.StartTime &&
                    EndTime == @event.EndTime &&
-                   EqualityComparer<List<Participant>>.Default.Equals(Participants, @event.Participants);
+                   EqualityComparer<GeoLocation>.Default.Equals(Place, @event.Place);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Id, Name, Type, Description, StartTime, EndTime, Participants);
+            return HashCode.Combine(Name, Type, Description, StartTime, EndTime, Place);
         }
     }
 }

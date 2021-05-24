@@ -1,11 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using x_kom_simple_API.Entities;
+using x_kom_simple_API.Utilities;
 
 namespace x_kom_simple_API.Controllers
 {
@@ -21,9 +20,9 @@ namespace x_kom_simple_API.Controllers
         }
         
         [HttpGet]
-        public IEnumerable<Event> Get()
+        public IEnumerable<Event> GetEvents()
         {
-            var collection = getEventsCollection("XKOM", "Events");
+            var collection = GetEventsCollection("XKOM", "Events");
             return collection.Find(s => true).ToList();
         }
 
@@ -31,7 +30,7 @@ namespace x_kom_simple_API.Controllers
         [HttpPost]
         public void PostEvent(Event e)
         {
-            var collection = getEventsCollection("XKOM", "Events");
+            var collection = GetEventsCollection("XKOM", "Events");
             collection.InsertOne(e);
 
         }
@@ -39,11 +38,12 @@ namespace x_kom_simple_API.Controllers
         [HttpDelete]
         public void DeleteEvent(Event e)
         {
-            var collection = getEventsCollection("XKOM", "Events");
-            collection.DeleteOne(x => e.Name == x.Name);
+            var collection = GetEventsCollection("XKOM", "Events");
+            var filter = Filters.getEventEaqualsFilter(e);
+            collection.DeleteOne(filter);
         }
 
-        private IMongoCollection<Event> getEventsCollection(String databaseName, String collectionName)
+        private IMongoCollection<Event> GetEventsCollection(String databaseName, String collectionName)
         {
             var database = client.GetDatabase(databaseName);
             return database.GetCollection<Event>(collectionName);
